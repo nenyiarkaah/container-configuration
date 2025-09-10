@@ -17,96 +17,6 @@ http:
           - main: '{{ env "DOMAIN" }}'
             sans:
               - '{{ env "WILDCARD_DOMAIN" }}'
-    proxmox:
-      entryPoints:
-        - websecure
-      rule: "Host(`proxmox.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: proxmox
-    synology-dsm:
-      entryPoints:
-        - websecure
-      rule: "Host(`synology-dsm.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: synology-dsm
-    transmission:
-      entryPoints:
-        - websecure
-      rule: "Host(`transmission.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: transmission
-    overseerr:
-      entryPoints:
-        - websecure
-      rule: "Host(`overseerr.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: overseerr
-    lidarr:
-      entryPoints:
-        - websecure
-      rule: "Host(`lidarr.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: lidarr
-    prowlarr:
-      entryPoints:
-        - websecure
-      rule: "Host(`prowlarr.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: prowlarr
-    radarr:
-      entryPoints:
-        - websecure
-      rule: "Host(`radarr.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: radarr
-    sonarr:
-      entryPoints:
-        - websecure
-      rule: "Host(`sonarr.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: sonarr
-    whisparr:
-      entryPoints:
-        - websecure
-      rule: "Host(`whisparr.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: whisparr
-    whisparrv3:
-      entryPoints:
-        - websecure
-      rule: "Host(`whisparr-v3.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: whisparrv3
     n8n:
       entryPoints:
         - websecure
@@ -116,15 +26,6 @@ http:
         - https-redirectscheme
       tls: {}
       service: n8n
-    mint:
-      entryPoints:
-        - websecure
-      rule: "Host(`mint.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: mint
     prometheus:
       entryPoints:
         - websecure
@@ -146,65 +47,10 @@ http:
 #endregion
 #region services
   services:
-    proxmox:
-      loadBalancer:
-        servers:
-          - url: https://cordelia:8006
-        passHostHeader: true
-    synology-dsm:
-      loadBalancer:
-        servers:
-          - url: http://rosalind:5000
-        passHostHeader: true
-    transmission:
-      loadBalancer:
-        servers:
-          - url: http://phobos:9091
-        passHostHeader: true
-    overseerr:
-      loadBalancer:
-        servers:
-          - url: http://overseerr:5055
-        passHostHeader: true
-    lidarr:
-      loadBalancer:
-        servers:
-          - url: http://lidarr:8686
-        passHostHeader: true
-    prowlarr:
-      loadBalancer:
-        servers:
-          - url: http://prowlarr:9696
-        passHostHeader: true
-    radarr:
-      loadBalancer:
-        servers:
-          - url: http://radarr:7878
-        passHostHeader: true
-    sonarr:
-      loadBalancer:
-        servers:
-          - url: http://sonarr:8989
-        passHostHeader: true
-    whisparr:
-      loadBalancer:
-        servers:
-          - url: http://whisparr:6969
-        passHostHeader: true
-    whisparrv3:
-      loadBalancer:
-        servers:
-          - url: http://juliet:6969
-        passHostHeader: true
     n8n:
       loadBalancer:
         servers:
           - url: http://n8n:5678
-        passHostHeader: true
-    mint:
-      loadBalancer:
-        servers:
-          - url: http://mint
         passHostHeader: true
     prometheus:
       loadBalancer:
@@ -239,7 +85,7 @@ http:
       ipAllowList:
         sourceRange:
         - "10.0.0.0/8"
-        - "192.168.198.0/16"
+        - "192.168.168.0/16"
         - "172.16.0.0/12"
 
     secured:
