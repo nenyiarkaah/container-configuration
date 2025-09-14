@@ -32,8 +32,6 @@ entryPoints:
     # <--
   websecure:
     address: :443
-  pve:
-    address: :8006
 
 # -- Configure your CertificateResolver here...
 certificatesResolvers:
