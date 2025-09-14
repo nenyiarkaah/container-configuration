@@ -28,7 +28,7 @@ http:
       service: proxmox
     proxmox-pve:
       entryPoints:
-        - websecure
+        - pve
       rule: "Host(`proxmox-pve.{{ env `DOMAIN` }}`)"
       middlewares:
         - default-headers
