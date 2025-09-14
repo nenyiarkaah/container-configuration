@@ -6,7 +6,7 @@ global:
 # --> (Optional) Change log level and format here ...
 #     - level: [TRACE, DEBUG, INFO, WARN, ERROR, FATAL]
 log:
- level: DEBUG
+ level: INFO
 # <--
 
 # --> (Optional) Enable accesslog here ...
@@ -32,6 +32,8 @@ entryPoints:
     # <--
   websecure:
     address: :443
+  pve:
+    address: :8006
 
 # -- Configure your CertificateResolver here...
 certificatesResolvers:
