@@ -26,6 +26,15 @@ http:
         - https-redirectscheme
       tls: {}
       service: proxmox
+    proxmox-pve:
+      entryPoints:
+        - websecure
+      rule: "Host(`proxmox-pve.{{ env `DOMAIN` }}`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: proxmox-pve
     synology-dsm:
       entryPoints:
         - websecure
@@ -150,6 +159,11 @@ http:
       loadBalancer:
         servers:
           - url: https://cordelia:8006
+        passHostHeader: true
+    proxmox-pve:
+      loadBalancer:
+        servers:
+          - url: https://juliet:9221
         passHostHeader: true
     synology-dsm:
       loadBalancer:
