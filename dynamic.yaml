@@ -152,6 +152,15 @@ http:
         - https-redirectscheme
       tls: {}
       service: grafana
+    rabbitmq:
+      entryPoints:
+        - websecure
+      rule: "Host(`rabbitmq.{{ env `DOMAIN` }}`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: rabbitmq
 #endregion
 #region services
   services:
@@ -229,6 +238,11 @@ http:
       loadBalancer:
         servers:
           - url: http://grafana:3000
+        passHostHeader: true
+    rabbitmq:
+      loadBalancer:
+        servers:
+          - url: http://rosalind:15672
         passHostHeader: true
 #endregion
   middlewares:
