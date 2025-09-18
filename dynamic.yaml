@@ -172,7 +172,7 @@ http:
     proxmox-pve:
       loadBalancer:
         servers:
-          - url: http://juliet:9221
+          - url: http://prometheus-pve-exporter:9221
         passHostHeader: true
     synology-dsm:
       loadBalancer:
