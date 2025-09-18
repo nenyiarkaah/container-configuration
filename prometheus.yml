@@ -2,7 +2,7 @@ scrape_configs:
   - job_name: 'pve'
     static_configs:
       - targets:
-        - https://proxmox.safetypin.me.uk:443  # Proxmox VE node.
+        - proxmox.safetypin.me.uk:443  # Proxmox VE node.
     metrics_path: /pve
     params:
       module: [default]
