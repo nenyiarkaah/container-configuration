@@ -14,4 +14,4 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: https://proxmox-pve.safetypin.me.uk  # PVE exporter IP address and port number - use docker host IP, not localhost
+        replacement: proxmox-pve.safetypin.me.uk  # PVE exporter IP address and port number - use docker host IP, not localhost
