@@ -6,7 +6,7 @@ global:
 # --> (Optional) Change log level and format here ...
 #     - level: [TRACE, DEBUG, INFO, WARN, ERROR, FATAL]
 log:
- level: INFO
+ level: DEBUG
 # <--
 
 # --> (Optional) Enable accesslog here ...
