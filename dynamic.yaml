@@ -81,12 +81,12 @@ http:
         customRequestHeaders:
           X-Forwarded-Proto: https
 
-    default-whitelist:
-      ipAllowList:
-        sourceRange:
-        - "10.0.0.0/8"
-        - "192.168.184.0/16"
-        - "172.16.0.0/12"
+    # default-whitelist:
+    #   ipAllowList:
+    #     sourceRange:
+    #     - "10.0.0.0/8"
+    #     - "192.168.184.0/16"
+    #     - "172.16.0.0/12"
 
     secured:
       chain:
