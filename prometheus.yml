@@ -2,7 +2,7 @@ scrape_configs:
   - job_name: 'pve'
     static_configs:
       - targets:
-        - proxmox.safetypin.me.uk:443  # Proxmox VE node.
+        - 10.140.50.20:8006  # Proxmox VE node.
     metrics_path: /pve
     params:
       module: [default]
@@ -14,4 +14,18 @@ scrape_configs:
       - source_labels: [__param_target]
         target_label: instance
       - target_label: __address__
-        replacement: proxmox-pve.safetypin.me.uk  # PVE exporter IP address and port number - use docker host IP, not localhost
+        replacement: 10.140.50.145:9221  # PVE exporter IP address and port number - use docker host IP, not localhost
+
+  - job_name: 'node'
+    static_configs:
+      - targets:
+        - 10.140.10.5:9100     # prospero
+        - 10.140.50.240:9100   # cressida
+        - 192.168.198.25:9100  # ariel
+        - 192.168.198.60:9100  # belinda
+        - 192.168.184.10:9100  # desdemona
+        - 192.168.184.35:9100  # portia
+        - 10.140.10.115:9100   # francisco
+        - 192.168.184.145:9100 # perdita
+        - 10.140.50.235:9100   # juliet
+        - 10.140.50.140:9100   # miranda
