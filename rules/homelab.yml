@@ -1,0 +1,29 @@
+groups:
+  - name: scheduled-containers
+    rules:
+      # Written by run-scheduled-container.sh (server-scripts) after every run
+      - alert: ScheduledContainerFailed
+        expr: scheduled_container_last_exit_code != 0
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.name }} on {{ $labels.instance }} exited with {{ $value }}'
+          description: 'See ~/containers/logs/{{ $labels.name }}.log on the host.'
+
+      # Daily jobs: allow two hours of slack after the expected run
+      - alert: ScheduledContainerMissed
+        expr: time() - scheduled_container_last_run_timestamp_seconds > 26 * 3600
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.name }} on {{ $labels.instance }} has not run for over 26 hours'
+
+  - name: targets
+    rules:
+      - alert: TargetDown
+        expr: up == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.job }} target {{ $labels.instance }} is down'
