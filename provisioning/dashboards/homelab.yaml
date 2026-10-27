@@ -1,0 +1,12 @@
+apiVersion: 1
+
+# Folders come from the subdirectories of dashboards/ (Overview, Containers, Infrastructure, Meta).
+providers:
+  - name: homelab
+    type: file
+    disableDeletion: false
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards/homelab
+      foldersFromFilesStructure: true
