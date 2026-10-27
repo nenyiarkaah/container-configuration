@@ -36,8 +36,12 @@ scrape_configs:
     scrape_interval: 30s
     static_configs:
       - targets:
-        - 10.140.50.235:8080   # juliet
-        - 10.140.50.140:8080   # miranda
+        - 10.140.50.235:9338   # juliet
+        - 10.140.50.140:9338   # miranda
+        - 10.140.10.5:9338     # prospero
+        - 10.140.10.115:9338   # francisco
+        - 10.140.50.240:9338   # cressida
+    # The Pis boot with cgroup_disable=memory, so they report no per-container memory.
 
   - job_name: 'prometheus'
     static_configs:
