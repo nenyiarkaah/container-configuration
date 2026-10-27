@@ -26,4 +26,15 @@ groups:
         labels:
           severity: warning
         annotations:
-          summary: '{{ $labels.job }} target {{ $labels.instance }} is down'
+          summary: '{{ $labels.job }} target {{ $labels.host }} ({{ $labels.instance }}) is down'
+
+  - name: hosts
+    rules:
+      # Would have caught the 2026-10-17 juliet OOM (leaked ssh-agents, host processes)
+      - alert: NodeMemoryAvailableLow
+        expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes < 0.10
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.host }} has {{ $value | humanizePercentage }} memory available'

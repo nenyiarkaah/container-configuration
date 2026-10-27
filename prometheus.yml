@@ -21,29 +21,38 @@ scrape_configs:
 
   - job_name: 'node'
     static_configs:
-      - targets:
-        - 10.140.10.5:9100     # prospero
-        - 10.140.50.240:9100   # cressida
-        - 10.140.10.115:9100   # francisco
-        - 10.140.50.10:9100    # phobos
-        - 10.140.50.235:9100   # juliet
-        - 10.140.50.140:9100   # miranda
+      - targets: ['10.140.10.5:9100']
+        labels: {host: prospero}
+      - targets: ['10.140.50.240:9100']
+        labels: {host: cressida}
+      - targets: ['10.140.10.115:9100']
+        labels: {host: francisco}
+      - targets: ['10.140.50.10:9100']
+        labels: {host: phobos}
+      - targets: ['10.140.50.235:9100']
+        labels: {host: juliet}
+      - targets: ['10.140.50.140:9100']
+        labels: {host: miranda}
     # ariel, belinda, desdemona, portia, perdita and ophelia sit on a second network
     # this Prometheus cannot reach; they need their own scrape path (Homelab Plan).
 
-  # Per-container metrics (Ansible monitoring role, enable_cadvisor)
+  # Per-container metrics (Ansible monitoring role, enable_cadvisor).
+  # The Pis boot with cgroup_disable=memory, so they report no per-container memory.
   - job_name: 'cadvisor'
     scrape_interval: 30s
     static_configs:
-      - targets:
-        - 10.140.50.235:9338   # juliet
-        - 10.140.50.140:9338   # miranda
-        - 10.140.10.5:9338     # prospero
-        - 10.140.10.115:9338   # francisco
-        - 10.140.50.240:9338   # cressida
-    # The Pis boot with cgroup_disable=memory, so they report no per-container memory.
+      - targets: ['10.140.50.235:9338']
+        labels: {host: juliet}
+      - targets: ['10.140.50.140:9338']
+        labels: {host: miranda}
+      - targets: ['10.140.10.5:9338']
+        labels: {host: prospero}
+      - targets: ['10.140.10.115:9338']
+        labels: {host: francisco}
+      - targets: ['10.140.50.240:9338']
+        labels: {host: cressida}
 
   - job_name: 'prometheus'
     static_configs:
-      - targets:
-        - localhost:9090
+      - targets: ['localhost:9090']
+        labels: {host: prometheus}
