@@ -18,6 +18,25 @@ groups:
         annotations:
           summary: '{{ $labels.name }} on {{ $labels.instance }} has not run for over 26 hours'
 
+  - name: backups
+    rules:
+      # Written by run-backup.sh (server-scripts) after every weekly rsync to Rosalind
+      - alert: BackupFailed
+        expr: backup_last_exit_code != 0
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.name }} backup on {{ $labels.host }} exited with {{ $value }}'
+          description: 'See /var/log/{{ $labels.name }}.log on the host. 23 = some files or attributes not transferred.'
+
+      # Weekly jobs: allow a day of slack
+      - alert: BackupMissed
+        expr: time() - backup_last_run_timestamp_seconds > 8 * 86400
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.name }} backup on {{ $labels.host }} has not run for over 8 days'
+
   - name: targets
     rules:
       - alert: TargetDown
@@ -38,3 +57,25 @@ groups:
           severity: warning
         annotations:
           summary: '{{ $labels.host }} has {{ $value | humanizePercentage }} memory available'
+
+      # Would have caught juliet's root disk at 0.1 % free (2026-10-29)
+      - alert: NodeFilesystemAlmostFull
+        expr: >-
+          node_filesystem_avail_bytes{fstype!~"tmpfs|ramfs|squashfs|overlay|nfs.*|fuse.*|vfat"}
+          / node_filesystem_size_bytes < 0.10
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: '{{ $labels.host }} {{ $labels.mountpoint }} has {{ $value | humanizePercentage }} free'
+
+      # LXC root disks, from the PVE exporter: would have caught Grafana's full disk (2026-10-27)
+      - alert: ProxmoxGuestDiskAlmostFull
+        expr: >-
+          pve_disk_usage_bytes{id=~"lxc/.*"} / pve_disk_size_bytes
+          * on(id) group_left(name) pve_guest_info > 0.90
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'LXC {{ $labels.name }} ({{ $labels.id }}) root disk is {{ $value | humanizePercentage }} full'
