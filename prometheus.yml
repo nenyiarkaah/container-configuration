@@ -37,7 +37,6 @@ scrape_configs:
     # this Prometheus cannot reach; they need their own scrape path (Homelab Plan).
 
   # Per-container metrics (Ansible monitoring role, enable_cadvisor).
-  # The Pis boot with cgroup_disable=memory, so they report no per-container memory.
   - job_name: 'cadvisor'
     scrape_interval: 30s
     static_configs:
@@ -51,6 +50,24 @@ scrape_configs:
         labels: {host: francisco}
       - targets: ['10.140.50.240:9338']
         labels: {host: cressida}
+
+  # Rosalind (Synology) over SNMPv3, through the exporter on juliet (Ansible
+  # monitoring role, enable_snmp_exporter). Credentials live in the exporter, not here.
+  - job_name: 'snmp'
+    metrics_path: /snmp
+    params:
+      module: [synology, if_mib]
+      auth: [rosalind]
+    static_configs:
+      - targets: ['10.140.50.5']
+        labels: {host: rosalind}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 10.140.50.235:9116
 
   - job_name: 'prometheus'
     static_configs:

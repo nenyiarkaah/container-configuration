@@ -79,3 +79,48 @@ groups:
           severity: warning
         annotations:
           summary: 'LXC {{ $labels.name }} ({{ $labels.id }}) root disk is {{ $value | humanizePercentage }} full'
+
+  # Rosalind (Synology) via the snmp job. Synology status values: 1 is normal.
+  - name: rosalind
+    rules:
+      - alert: RosalindSystemUnhealthy
+        expr: systemStatus != 1 or powerStatus != 1 or systemFanStatus != 1 or cpuFanStatus != 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Rosalind {{ $labels.__name__ }} is {{ $value }} (1 is normal)'
+
+      - alert: RosalindDiskUnhealthy
+        expr: diskStatus != 1 or diskHealthStatus != 1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Rosalind {{ $labels.diskID }} status {{ $value }} (1 is normal)'
+
+      # 1 normal, 2 repairing, 3 migrating, 4 expanding, ... 11 degraded, 12 crashed
+      - alert: RosalindRaidNotNormal
+        expr: raidStatus != 1
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Rosalind {{ $labels.raidName }} RAID status {{ $value }} (1 normal, 11 degraded, 12 crashed)'
+
+      - alert: RosalindVolumeAlmostFull
+        expr: raidFreeSize{raidName=~"Volume.*"} / raidTotalSize < 0.10
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Rosalind {{ $labels.raidName }} has {{ $value | humanizePercentage }} free'
+
+      # IronWolf Pro are rated to 70 C; they normally sit in the 40s here
+      - alert: RosalindDiskHot
+        expr: diskTemperature > 55
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Rosalind {{ $labels.diskID }} is at {{ $value }} C'
