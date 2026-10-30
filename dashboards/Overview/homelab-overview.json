@@ -854,7 +854,6 @@
           "sort": "desc"
         }
       },
-      "description": "Pis are missing: they boot with cgroup_disable=memory.",
       "id": 12
     },
     {

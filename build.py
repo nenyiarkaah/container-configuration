@@ -4,7 +4,7 @@
 Run `python3 build.py` after editing, and commit both this file and the output.
 Grafana's file provider reads dashboards/; it never sees src/ or this script.
 
-- Overview and Containers are defined here.
+- Overview, Containers and Rosalind are defined here.
 - Hosts is grafana.com 1860 (Node Exporter Full), from src/.
 - Proxmox and Prometheus are the dashboards first built in the Grafana UI,
   exported to src/ on 2026-10-27, with their bugs fixed below.
@@ -197,8 +197,7 @@ def overview():
             description="NodeMemoryAvailableLow fires below 10% for 15 minutes."),
         timeseries("Top 10 containers by memory", [target(
             'topk(10, container_memory_working_set_bytes{name!=""})', "{{name}} ({{host}})")],
-            0, 26, unit="bytes",
-            description="Pis are missing: they boot with cgroup_disable=memory."),
+            0, 26, unit="bytes"),
         timeseries("Top 10 containers by CPU", [target(
             'topk(10, sum by (host, name) (rate(container_cpu_usage_seconds_total{name!=""}[$__rate_interval])))',
             "{{name}} ({{host}})")],
@@ -232,8 +231,7 @@ def containers():
             f'sum by (host, name) (rate(container_cpu_usage_seconds_total{{{sel}}}[$__rate_interval]))',
             "{{name}} ({{host}})")], 0, 8, unit="short", description="CPU cores used."),
         timeseries("Memory (working set)", [target(
-            f'container_memory_working_set_bytes{{{sel}}}', "{{name}} ({{host}})")], 12, 8, unit="bytes",
-            description="Empty for prospero, francisco and cressida: the Pis boot with cgroup_disable=memory."),
+            f'container_memory_working_set_bytes{{{sel}}}', "{{name}} ({{host}})")], 12, 8, unit="bytes"),
         timeseries("Network received", [target(
             f'sum by (host, name) (rate(container_network_receive_bytes_total{{{sel}}}[$__rate_interval]))',
             "{{name}} ({{host}})")], 0, 16, unit="Bps"),
@@ -252,6 +250,88 @@ def containers():
         query_var("container", 'label_values(container_last_seen{host=~"$host", name!=""}, name)', "Container"),
     ]
     return dashboard("homelab-containers", "Containers", panels, ["containers", "cadvisor"], variables)
+
+
+# ---------------------------------------------------------------- rosalind
+
+NORMAL_OR_FAILED = [{"type": "value", "options": {"1": {"text": "Normal", "color": "green"}}},
+                    {"type": "range", "options": {"from": 2, "to": 99, "result": {"text": "Failed", "color": "red"}}}]
+RAID_STATUS = [{"type": "value", "options": {
+    "1": {"text": "Normal", "color": "green"},
+    "2": {"text": "Repairing", "color": "orange"},
+    "3": {"text": "Migrating", "color": "orange"},
+    "4": {"text": "Expanding", "color": "orange"},
+    "11": {"text": "Degraded", "color": "red"},
+    "12": {"text": "Crashed", "color": "red"},
+}}]
+NORMAL_ONLY = [{"color": "green", "value": None}, {"color": "red", "value": 2}]
+
+
+def rosalind():
+    """Synology DS (Rosalind) over SNMPv3: the snmp job, through the exporter on juliet."""
+    vol = 'raidName=~"Volume.*"'
+    panels = [
+        stat("System", "systemStatus", 0, 0, steps=NORMAL_ONLY, mappings=NORMAL_OR_FAILED),
+        stat("Power", "powerStatus", 4, 0, steps=NORMAL_ONLY, mappings=NORMAL_OR_FAILED),
+        stat("Fans", "max(systemFanStatus or cpuFanStatus)", 8, 0, steps=NORMAL_ONLY, mappings=NORMAL_OR_FAILED),
+        stat("RAID", "max(raidStatus)", 12, 0, steps=NORMAL_ONLY, mappings=RAID_STATUS,
+             description="Worst status across the storage pool and volume."),
+        stat("Volume 1 free", f'100 * raidFreeSize{{{vol}}} / raidTotalSize', 16, 0, unit="percent",
+             steps=[{"color": "red", "value": None}, {"color": "orange", "value": 10}, {"color": "green", "value": 20}]),
+        stat("System temperature", "temperature", 20, 0, unit="celsius",
+             steps=[{"color": "green", "value": None}, {"color": "orange", "value": 65}, {"color": "red", "value": 75}]),
+
+        table("Disks", [
+            target('diskModel', instant=True, ref="Model", fmt="table"),
+            target('diskTemperature', instant=True, ref="Temp", fmt="table"),
+            target('diskStatus', instant=True, ref="Status", fmt="table"),
+            target('diskHealthStatus', instant=True, ref="Health", fmt="table"),
+            target('diskBadSector', instant=True, ref="Bad", fmt="table"),
+            target('diskRemainLife', instant=True, ref="Life", fmt="table"),
+        ], 0, 4, 24, 7, [
+            {"id": "merge", "options": {}},
+            {"id": "organize", "options": {
+                "excludeByName": {"Time": True, "host": True, "instance": True, "job": True, "Value #Model": True},
+                "indexByName": {"diskID": 0, "diskModel": 1, "Value #Temp": 2, "Value #Status": 3,
+                                "Value #Health": 4, "Value #Bad": 5, "Value #Life": 6},
+                "renameByName": {"diskID": "Disk", "diskModel": "Model", "Value #Temp": "Temperature",
+                                 "Value #Status": "Status", "Value #Health": "Health",
+                                 "Value #Bad": "Bad sectors", "Value #Life": "SSD life left %"},
+            }},
+        ], overrides=[
+            {"matcher": {"id": "byRegexp", "options": "Status|Health"}, "properties": [
+                {"id": "mappings", "value": NORMAL_OR_FAILED},
+                {"id": "custom.cellOptions", "value": {"type": "color-background", "mode": "basic"}},
+            ]},
+            {"matcher": {"id": "byName", "options": "Temperature"}, "properties": [
+                {"id": "unit", "value": "celsius"},
+                {"id": "custom.cellOptions", "value": {"type": "color-background", "mode": "basic"}},
+                {"id": "thresholds", "value": {"mode": "absolute", "steps": [
+                    {"color": "green", "value": None}, {"color": "orange", "value": 50}, {"color": "red", "value": 55}]}},
+            ]},
+            {"matcher": {"id": "byName", "options": "SSD life left %"}, "properties": [
+                {"id": "mappings", "value": [{"type": "value", "options": {"-1": {"text": "-"}}}]},
+            ]},
+        ], description="RosalindDiskUnhealthy fires if Status or Health leaves Normal; RosalindDiskHot above 55 C for 30 minutes."),
+
+        timeseries("CPU and memory", [
+            target("cpuUtilization", "CPU"),
+            target("memUtilization", "Memory", ref="B"),
+        ], 0, 11, unit="percent"),
+        timeseries("Volume used", [target(
+            f'100 * (1 - raidFreeSize{{{vol}}} / raidTotalSize)', "{{raidName}}")], 12, 11, unit="percent",
+            description="RosalindVolumeAlmostFull fires below 10% free."),
+        timeseries("Disk temperatures", [target("diskTemperature", "{{diskID}}")], 0, 19, unit="celsius"),
+        timeseries("Disk throughput", [
+            target('rate(storageIONReadX[$__rate_interval])', "{{storageIODevice}} read"),
+            target('-rate(storageIONWrittenX[$__rate_interval])', "{{storageIODevice}} write", ref="B"),
+        ], 12, 19, unit="Bps", description="Writes are drawn below zero."),
+        timeseries("Network", [
+            target('rate(ifHCInOctets{ifName=~"eth.*|bond.*"}[$__rate_interval]) * 8', "{{ifName}} in"),
+            target('-rate(ifHCOutOctets{ifName=~"eth.*|bond.*"}[$__rate_interval]) * 8', "{{ifName}} out", ref="B"),
+        ], 0, 27, 24, unit="bps", description="Physical ports and the bond. Out is drawn below zero."),
+    ]
+    return dashboard("homelab-rosalind", "Rosalind (NAS)", panels, ["rosalind", "synology", "snmp"])
 
 
 # ---------------------------------------------------------------- imported / exported
@@ -313,6 +393,7 @@ BUILD = {
     "Containers/containers.json": containers,
     "Infrastructure/hosts.json": hosts,
     "Infrastructure/proxmox.json": proxmox,
+    "Infrastructure/rosalind.json": rosalind,
     "Meta/prometheus.json": prometheus,
 }
 

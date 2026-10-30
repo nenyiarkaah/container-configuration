@@ -267,7 +267,6 @@
           "sort": "desc"
         }
       },
-      "description": "Empty for prospero, francisco and cressida: the Pis boot with cgroup_disable=memory.",
       "id": 3
     },
     {
