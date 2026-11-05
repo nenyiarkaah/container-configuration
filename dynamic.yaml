@@ -53,15 +53,6 @@ http:
         - https-redirectscheme
       tls: {}
       service: transmission
-    overseerr:
-      entryPoints:
-        - websecure
-      rule: "Host(`overseerr.{{ env `DOMAIN` }}`)"
-      middlewares:
-        - default-headers
-        - https-redirectscheme
-      tls: {}
-      service: overseerr
     seerr:
       entryPoints:
         - websecure
@@ -176,7 +167,7 @@ http:
     proxmox:
       loadBalancer:
         servers:
-          - url: https://cordelia:8006
+          - url: https://cordelia.lab:8006
         passHostHeader: true
     proxmox-pve:
       loadBalancer:
@@ -192,11 +183,6 @@ http:
       loadBalancer:
         servers:
           - url: http://phobos:9091
-        passHostHeader: true
-    overseerr:
-      loadBalancer:
-        servers:
-          - url: http://overseerr:5055
         passHostHeader: true
     seerr:
       loadBalancer:
@@ -231,7 +217,7 @@ http:
     whisparrv3:
       loadBalancer:
         servers:
-          - url: http://juliet:6969
+          - url: http://juliet.lab:6969
         passHostHeader: true
     n8n:
       loadBalancer:
@@ -241,7 +227,7 @@ http:
     mint:
       loadBalancer:
         servers:
-          - url: http://mint
+          - url: http://miranda
         passHostHeader: true
     prometheus:
       loadBalancer:
