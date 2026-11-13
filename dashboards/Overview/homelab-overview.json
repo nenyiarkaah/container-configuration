@@ -179,7 +179,7 @@
         "colorMode": "background",
         "graphMode": "none"
       },
-      "description": "Prometheus alert rules (container-configuration @ prometheus, rules/homelab.yml). No notification channel is configured yet: this panel is the only place they show.",
+      "description": "Prometheus alert rules (container-configuration @ prometheus, rules/homelab.yml). Alertmanager also posts them to Slack #homelab-alerts.",
       "id": 3
     },
     {

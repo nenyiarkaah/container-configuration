@@ -132,7 +132,7 @@ def overview():
         stat("Alerts firing", 'count(ALERTS{alertstate="firing"}) or vector(0)', 8, 0,
              steps=RED_IF_ABOVE_ZERO,
              description="Prometheus alert rules (container-configuration @ prometheus, rules/homelab.yml). "
-                         "No notification channel is configured yet: this panel is the only place they show."),
+                         "Alertmanager also posts them to Slack #homelab-alerts."),
         stat("Last importer exit code", 'scheduled_container_last_exit_code{name="national-lottery-importer"}',
              12, 0, steps=RED_IF_ABOVE_ZERO,
              description="Written by run-scheduled-container.sh on juliet after each 06:00 UTC run."),
