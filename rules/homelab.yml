@@ -20,14 +20,16 @@ groups:
 
   - name: backups
     rules:
-      # Written by run-backup.sh (server-scripts) after every weekly rsync to Rosalind
+      # Written by run-backup.sh (server-scripts) after every weekly rsync to Rosalind.
+      # francisco, 2026-11-22: rsync exited 24 (Pi-hole files vanished mid-copy), a
+      # complete backup; run-backup.sh now records 24 as 0
       - alert: BackupFailed
         expr: backup_last_exit_code != 0
         labels:
           severity: warning
         annotations:
           summary: '{{ $labels.name }} backup on {{ $labels.host }} exited with {{ $value }}'
-          description: 'See /var/log/{{ $labels.name }}.log on the host. 23 = some files or attributes not transferred.'
+          description: 'See /var/log/{{ $labels.name }}.log on the host. 2 = destination not on a working NFS mount (nothing copied); 23 = some files or attributes not transferred; other codes are rsync errors (man rsync, EXIT VALUES).'
 
       # Weekly jobs: allow a day of slack
       - alert: BackupMissed
